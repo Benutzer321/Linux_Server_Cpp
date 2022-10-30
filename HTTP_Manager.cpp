@@ -7,6 +7,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <chrono>
 
 
 // GET /tttt HTTP/1.1  /19
@@ -28,21 +29,17 @@
 
 namespace ez_http {
 
-    class Header{
-        size_t size_in_Bytes;
-        void* value;
-    };
-
-
     class H_HTTP{
 
         private:
+
+            char info [4] = "200";
 
             bool p_error;
 
             std::string msg, method, path, request;
 
-            std::unordered_map<std::string, std::string> cookies;
+            std::unordered_map<std::string, std::string> Request_Header, Respond_Cookies;
             
         private:
 
@@ -64,7 +61,8 @@ namespace ez_http {
                 
                 method = msg.substr(0,tmp);
                 path = msg.substr(tmp + 1, tmp2 - tmp);
-                request = msg.substr(0, tmp3);
+                for (short i = 0; i != 2; )
+                    request = msg.substr(0, tmp3);
 
                 return true;
                 }
@@ -83,7 +81,7 @@ namespace ez_http {
                     if(tmp3 == std::string::npos)
                         break;
 
-                    cookies.insert({msg.substr(tmp1, tmp2 - tmp1 ), msg.substr(tmp2 + 2, tmp3 - 1 - (tmp2 + 1))});
+                    Request_Header.insert({msg.substr(tmp1, tmp2 - tmp1 ), msg.substr(tmp2 + 2, tmp3 - 1 - (tmp2 + 1))});
     
                     tmp1 = tmp3 + 1;
                 }
@@ -101,79 +99,81 @@ namespace ez_http {
 
             void print(){
                 
-                std::cout << "Method/Path: " << method << ' ' << path << std::endl;
+                std::cout << "Method/Path: " << method << " / " << path << std::endl;
 
-                for( auto i = cookies.begin(); i != cookies.end(); ++i)
+                std::cout << "Headername: Value" <<std::endl;
+
+                for( auto i = Request_Header.begin(); i != Request_Header.end(); ++i)
                     std::cout << i->first << ": " << i->second <<std::endl;
 
                 return;
             };
 
+            std::string Respond(char * _Buff, size_t _n){
+
+                std::string Header;
+                char top[16] = "HTTP/1.1 XXX OK";
+                strncpy(&top[9],info,3);
+
+                char Header1[] = "Date:"
+
+                Header.append(info);
+
+                //temp
+                char* info_str = "OK";
+                Header.append(info_str);
+                
+
+
+            }
+
+            std::string get(std::string _Key){
+                if (Request_Header.contains(_Key))
+                    return Request_Header[_Key];
+
+                if (Respond_Cookies.contains(_Key))
+                    return Respond_Cookies[_Key];
+                    
+                return "";
+            }
+            bool set( std::string _Key, std::string _Value){
+
+                if(Request_Header.contains(_Key))
+                    return false;
+                
+                Respond_Cookies[_Key] = _Value;
+                return true;
+            }
+
+            const std::string operator[](std::string _Key){
+
+                if (Request_Header.contains(_Key))
+                    return Request_Header[_Key];
+
+                if (Respond_Cookies.contains(_Key))
+                    return Respond_Cookies[_Key];
+                    
+                return "";
+            }
+
             H_HTTP(char* _msg, size_t _msg_size){
             
-            p_error = 0;
+                p_error = 0;
 
-            msg = std::string(_msg,_msg_size);
+                msg = std::string(_msg,_msg_size);
 
-            if(!check_completion())
-                p_error = p_error | 1;
+                if(!check_completion())
+                    p_error = p_error | 1;
                 
-            if(!get_path())
-                p_error = p_error | 2;
+                if(!get_path())
+                    p_error = p_error | 2;
 
-            if(!get_header())
-                p_error = p_error | 4;
-            };
+                if(!get_header())
+                    p_error = p_error | 4;
+                };
 
-            ~H_HTTP(){
-            }
-
-
-
-
-
+            ~H_HTTP(){}
     };
-
-
-    typedef int (*Function)(H_HTTP); 
-
-    struct Task{
-
-        #define HTTP_Function 1
-        #define HTTP_Pipe 2
-        #define HTTP_Socket 4
-
-        private:
-
-        unsigned int Type;
-        Function Func;
-        int sock_pipe;
-
-        private:
-
-            
-        public:
-
-            Task(int _dest, unsigned int _Type): sock_pipe(_dest), Type(_Type){};
-
-            Task(Function _dest, unsigned int _Type): Func(_dest), Type(_Type){};
-
-            H_HTTP process(H_HTTP _h){
-
-                if (Type & HTTP_Function)
-                    Func(_h);
-                
-                if(Type & HTTP_Pipe)
-                    return _h;
-
-                if(Type & HTTP_Socket)
-                    return _h;
-
-                return _h;
-            }
-
-    };
-    
 }
 
 #endif
