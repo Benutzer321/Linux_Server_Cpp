@@ -27,7 +27,7 @@
 
 
 
-namespace ez_http {
+namespace HTTP{
 
     class H_HTTP{
 
@@ -92,6 +92,12 @@ namespace ez_http {
 
 
         public:
+            static bool check_completion(char * _Buff, size_t _n){
+            std::string msg(_Buff,_n);  
+                if(msg.rfind("\r\n\r\n") != std::string::npos)
+                    return true;
+                return false;
+            }
 
             bool error(){
                 return p_error;
@@ -115,7 +121,7 @@ namespace ez_http {
                 char top[16] = "HTTP/1.1 XXX OK";
                 strncpy(&top[9],info,3);
 
-                char Header1[] = "Date:"
+                char Header1[] = "Date:";
 
                 Header.append(info);
 

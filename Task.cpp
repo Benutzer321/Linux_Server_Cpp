@@ -7,7 +7,7 @@
 
 namespace ez_soc{
 
-typedef ez_http::H_HTTP (*Function)(ez_http::H_HTTP*); 
+typedef HTTP::H_HTTP (*Function)(HTTP::H_HTTP*); 
 
     struct Task{
 
@@ -30,7 +30,7 @@ typedef ez_http::H_HTTP (*Function)(ez_http::H_HTTP*);
 
             Task(Function _dest, unsigned int _Type): Func(_dest), Type(_Type){};
 
-            ez_http::H_HTTP process(ez_http::H_HTTP _h){
+            HTTP::H_HTTP process(HTTP::H_HTTP _h){
 
                 if (Type & HTTP_Function)
                     return Func(&_h);

@@ -16,7 +16,7 @@
 #include <string>
 #include <cstring>
 
-#define MAX_MESSAGE_SIZE 4096
+#define MAX_MESSAGE_SIZE 8192
 
 class Worker{
 
@@ -57,8 +57,14 @@ public:
                 H->drop_client(C);
                 continue;
             }
+            if(rBytes == MAX_MESSAGE_SIZE){
+                if(!HTTP::H_HTTP::check_completion(Buffer,rBytes)){
+                    std::string return_msg = "HTTP/1.1 431 Request Header Fields Too Large\n";
+                    sBytes = ez_soc::write_socket(C->socket,(char*)return_msg.c_str(), return_msg.size());
+                }
+            }
             
-            ez_http::H_HTTP Http_handler(Buffer,rBytes);
+            HTTP::H_HTTP Http_handler(Buffer,rBytes);
             
             if(Http_handler.error())
                 std::cout << std::bitset<16> (Http_handler.error()) <<std::endl;
