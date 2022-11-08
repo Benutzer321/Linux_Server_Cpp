@@ -12,114 +12,77 @@
 
 namespace HTTP{
 
-    struct Value{
-
-        void* Pointer;
-        size_t Size;
-
-        Value(void* _Pointer, size_t _Size_in_Bytes){
-            Size = _Size_in_Bytes;
-            Pointer = new void[Size];
-            strncpy(Pointer,_Pointer,Size);
-
-        };
-
-        Value(std::string _str){
-            Size = _str.size();
-            Pointer = new char[Size];
-            strncpy((char*)Pointer,_str.c_str(),Size);
-            };
-
-        Value():Pointer(nullptr),Size(NULL){}
-
-        Value& operator=(const Value& other){
-            if(this = &other)
-                return this*;
-            if(Size != other.Size){
-                Size = other.Size;
-                delete Pointer;
-                Pointer = new void[Size];
-            }
-            std::copy(other.Pointer, other.Pointer + other.Size, Pointer)
-            return *this;
-
-            
-        }
-
-        ~Value(){
-            if(Size)
-                delete[] Pointer;
-        }
-        
-    };
+    const static std::map<std::string,std::string> Response_Codes = {{"200", "ok"},{"201", "Created"},{"202", "Accepted"},{"204","No Content"},
+                                                                    {"300", "Multiple Choices"},
+                                                                    {"400", "Bad Request"}, {"401", "Unauthorized"},{"403", "Forbidden"}, {"404", "Not Found"}};
+    
 
     class Response{
         
 
         private:
 
-            typedef std::string str
+            typedef std::string str;
 
-            std::list<std::string> Response;
-            std::map<std::string, Value> Headers;
-            std::unordered_map<std::string, Value> Content;
+            char Code[4] = "200";
+
+            char* Body;
+            size_t Body_Size;
+
+
+            std::map<std::string, std::string> Headers;
+            std::unordered_map<std::string, std::string> Content;
 
         private:
 
 
         public:
 
-        Value& operator [](str _key){
-            if(!Content.count(key)){
-
-                    Content.insert({key,Value(nullptr,0)});
-                }
-                return Content[key];
-                };
-        
-        
-        str get_var_str(str _key){
-            if(!Content.count(key))
-                return str("")
-            return str(Content[_key].Pointer, Content[_key].Size)
-        }
-
-        size_t get_var_size(str _key){
-            if(!Content.count(_key))
-                return 0;
-            return Content[_key].Size;
-        }
-
-        void add_Header(str _header, Value _V){
-            Headers[_header] = _V;
-        }
-
-        Value& get_Header(str _header){
-            if(!Headers.count(key))
-                return {nullptr, NULL}   
-        }
-        
-
-        
-
-
-
-
-
-        size_t get_Response(char* _Buff, size_t _n, size_t _s = 0){
-
-        }
-        
-
-        }
             
-
 
         public:
 
+        void set_ResponseCode(str _code){
+            if (_code.size() != 4)
+                return;
+            strcpy(Code,_code.c_str());
+        };
 
+        void set_ResponseCode(int _code){
+            if(_code <= 99 | _code >= 600)
+                return;
+            strcpy(Code, std::to_string(_code).c_str());
+            }
+        
+        std::pair<std::string,std::string> get_ResponseCode(){
+            if(Response_Codes.count(Code))
+                return std::pair<std::string,std::string>(Code, Response_Codes.at(Code));
+            return {Code, "Definition not Found"};
+        } 
 
+        str& operator [](str _key){
+            if(!Content.count(_key))
+                    Content.insert({_key,str("")});
+                return Content[_key];
+                };
+        
+        
+        str get_var(str _key){
+            if(!Content.count(_key))
+                return str("");
+            return Content[_key];
+        }
 
+        str& add_Header(str _header, str _V){
+            Headers[_header] = _V;
+            return Headers[_header];
+        }
+
+        str get_Header(str _header){
+            if(!Headers.count(_header))
+                return str("");
+            return Headers[_header];
+        }
     };
 
 };
