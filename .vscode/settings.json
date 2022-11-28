@@ -55,6 +55,7 @@
         "list": "cpp",
         "map": "cpp",
         "cstring": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "iomanip": "cpp"
     }
 }

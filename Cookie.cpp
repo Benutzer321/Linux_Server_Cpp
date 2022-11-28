@@ -12,7 +12,7 @@
 
 namespace HTTP{
 
-    static double Standart_Cookie_Expiration_h = 24;
+    static double Standart_Cookie_Expiration_h = 48;
 
     class Cookie{
 
@@ -27,7 +27,8 @@ namespace HTTP{
             std::string Domain;
             std::string Path;
 
-            bool secure;
+            bool secure = false;
+            bool HttpOnly = false;
 
             
         
@@ -42,8 +43,6 @@ namespace HTTP{
 
                 std::string expiration;
 
-                expiration +=
-
                 char expirationdate_str[30], temp[25];
                 memset(expirationdate_str,0,30);
 
@@ -57,11 +56,8 @@ namespace HTTP{
                 strncpy(&expirationdate_str[8],&temp[4],3);
                 strncpy(&expirationdate_str[12],&temp[20],4);
                 strncpy(&expirationdate_str[17],&temp[11],8);
-            }
 
-            std::string get_cookie_str(){
-
-
+                return std::string(expirationdate_str);
             }
 
 
@@ -70,16 +66,33 @@ namespace HTTP{
         const std::string expiration;
 
         public:
-            std::string get_cookie_str(char* _Kecks, size_t _n){
+
+            void domain(std::string _Domain){ Domain = _Domain; };
+
+            void path(std::string _Path){ Path = _Path; };
+
+            std::string get_cookie_str(){
                 
                 std::string Kecks;
 
-                Kecks = "Set-Cookie: " + Name + '=' + Value + '; ';
+                Kecks = "Set-Cookie: " + Name + '=' + Value;
 
+                Kecks +=  "; Expiers=" + get_expiration_date();
 
+                if(Path.size() > 0)
+                    Kecks += "; Path=" + Path ;
+                
+                if(Domain.size() > 0)
+                    Kecks += "; Domain=" + Domain;
 
-                Kecks +=  "Expiers=" + get_expiration_date() + 
+                if(secure)
+                    Kecks += "; Secure";
 
+                if(HttpOnly)
+                    Kecks += "; HttpOnly";
+                
+                
+                return Kecks;
                 }
 
 
@@ -94,7 +107,10 @@ namespace HTTP{
 int main(int argc, char const *argv[])
 {
     HTTP::Cookie C("eric","20");
+    C.domain("Google.de");
+    C.path("/");
 
+    std::cout << C.get_cookie_str() << std::endl;
     
     return 0;
 }
