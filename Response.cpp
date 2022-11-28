@@ -3,11 +3,18 @@
 
 
 #include <iostream>
+
 #include <string>
 #include <cstring>
+
 #include <unordered_map>
 #include <map>
 #include <list>
+
+#include <fstream>
+#include <sys/stat.h>
+
+#include "Cookie.cpp"
 
 
 namespace HTTP{
@@ -16,24 +23,55 @@ namespace HTTP{
                                                                     {"300", "Multiple Choices"},
                                                                     {"400", "Bad Request"}, {"401", "Unauthorized"},{"403", "Forbidden"}, {"404", "Not Found"}};
     
+    const static size_t MAX_FILE_SIZE = 1000000;
 
     class Response{
         
 
         private:
 
+
             typedef std::string str;
 
             char Code[4] = "200";
 
+            std::map<std::string, std::string> Headers;
+
+            std::unordered_map<std::string, Cookie> Cookies;
+
             char* Body;
             size_t Body_Size;
-
-
-            std::map<std::string, std::string> Headers;
-            std::unordered_map<std::string, std::string> Content;
+            std::string Filetype;
 
         private:
+
+            inline bool file_exists(const std::string & _path){
+                struct stat buffer;
+                return (stat(_path.c_str(),&buffer) == 0);
+
+            }
+
+            ssize_t read_File(const char * _Path, size_t maxBuffsize = MAX_FILE_SIZE){
+                
+                std::ifstream MyFile(_Path, std::ios::in | std::ios::binary | std::ios::ate);
+                ssize_t Size;
+                if(!MyFile.is_open())
+                    return -1;
+
+                Size = MyFile.tellg();
+                MyFile.seekg(0, std::ios::beg);
+                if( Size > maxBuffsize)
+                    return -2;
+                
+                Body = new char[Size];
+
+                MyFile.read(Body, Size);
+
+                MyFile.close();
+
+                return Size;    
+            }
+        
 
 
         public:
@@ -58,33 +96,33 @@ namespace HTTP{
             if(Response_Codes.count(Code))
                 return std::pair<std::string,std::string>(Code, Response_Codes.at(Code));
             return {Code, "Definition not Found"};
-        } 
-
-        str& operator [](str _key){
-            if(!Content.count(_key))
-                    Content.insert({_key,str("")});
-                return Content[_key];
-                };
-        
-        
-        str get_var(str _key){
-            if(!Content.count(_key))
-                return str("");
-            return Content[_key];
         }
 
-        str& add_Header(str _header, str _V){
-            Headers[_header] = _V;
-            return Headers[_header];
+        void body(char* _body, size_t _size){
+            Body = new char[_size];
+            strncpy(Body,_body,_size);
+            Filetype = "text";
+        };
+
+        ssize_t body_file(str _path){
+
+            if(!file_exists(_path))
+                return -1;
+
+            return read_File(_path.c_str());    
         }
 
-        str get_Header(str _header){
-            if(!Headers.count(_header))
-                return str("");
-            return Headers[_header];
+
+        Cookie& ad_cookie(str _Name){
+            if(Cookies.count(_Name))
+                return Cookies.at(_Name);
+            Cookies.insert({_Name,{_Name,NULL}});
+            return Cookies.at(_Name);
         }
+
+        Cookie& operator[](str _Name){ return ad_cookie(_Name); };
+
     };
-
 };
 
 

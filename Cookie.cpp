@@ -14,6 +14,8 @@ namespace HTTP{
 
     static double Standart_Cookie_Expiration_h = 48;
 
+    //https://www.rfc-editor.org/rfc/rfc6265
+
     class Cookie{
 
         private:
@@ -22,7 +24,7 @@ namespace HTTP{
 
             std::string Value;
 
-            double expiers_h;
+            double expires_h;
 
             std::string Domain;
             std::string Path;
@@ -39,7 +41,7 @@ namespace HTTP{
                 time_t rawtime;
                 time(&rawtime);
 
-                rawtime += expiers_h * 60 * 60;
+                rawtime += expires_h * 60 * 60;
 
                 std::string expiration;
 
@@ -71,34 +73,38 @@ namespace HTTP{
 
             void path(std::string _Path){ Path = _Path; };
 
+            void operator= (std::string _Value){ Value = _Value;};
+
+            void expiration_h(double _h){ expires_h = _h;};
+
             std::string get_cookie_str(){
                 
-                std::string Kecks;
+                std::string Keks;
 
-                Kecks = "Set-Cookie: " + Name + '=' + Value;
+                Keks = "Set-Cookie: " + Name + '=' + Value;
 
-                Kecks +=  "; Expiers=" + get_expiration_date();
+                Keks +=  "; Expiers=" + get_expiration_date();
 
                 if(Path.size() > 0)
-                    Kecks += "; Path=" + Path ;
+                    Keks += "; Path=" + Path ;
                 
                 if(Domain.size() > 0)
-                    Kecks += "; Domain=" + Domain;
+                    Keks += "; Domain=" + Domain;
 
                 if(secure)
-                    Kecks += "; Secure";
+                    Keks += "; Secure";
 
                 if(HttpOnly)
-                    Kecks += "; HttpOnly";
+                    Keks += "; HttpOnly";
                 
                 
-                return Kecks;
+                return Keks;
                 }
 
 
-            Cookie(std::string _name, std::string _value): Name(_name),Value(_value),expiers_h(Standart_Cookie_Expiration_h){};
+            Cookie(std::string _name, std::string _value): Name(_name),Value(_value),expires_h(Standart_Cookie_Expiration_h){};
 
-            Cookie(std::string _name, std::string _value, double _h): Name(_name),Value(_value),expiers_h(_h){}
+            Cookie(std::string _name, std::string _value, double _h): Name(_name),Value(_value),expires_h(_h){}
 
 
     };
