@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <map>
 #include <list>
+#include <vector>
 
 #include <fstream>
 #include <sys/stat.h>
@@ -19,17 +20,18 @@
 
 namespace HTTP{
 
-    const static std::map<std::string,std::string> Response_Codes = {{"200", "ok"},{"201", "Created"},{"202", "Accepted"},{"204","No Content"},
-                                                                    {"300", "Multiple Choices"},
-                                                                    {"400", "Bad Request"}, {"401", "Unauthorized"},{"403", "Forbidden"}, {"404", "Not Found"}};
+    static std::map<std::string,std::string> Response_Codes = {{"200", "ok"},{"201", "Created"},{"202", "Accepted"},{"204","No Content"},
+                                                                    { "300", "Multiple Choices"},
+                                                                    { "400", "Bad Request"}, {"401", "Unauthorized"},{"403", "Forbidden"}, {"404", "Not Found"}};
+    
+    static std::map<std::string, std::string> Content_Type = {{".css", "text/css"}, {".csv", "text/csv"}, {".html", "text/html"}, {".xlm", "text/xml"},
+                                                              {".js","application/javascript"}, {".json", "application/json"}, {".pdf", "application/pdf"},{".zip", "application/zip"}};
     
     const static size_t MAX_FILE_SIZE = 1000000;
 
     class Response{
         
-
         private:
-
 
             typedef std::string str;
 
@@ -41,6 +43,7 @@ namespace HTTP{
 
             char* Body;
             size_t Body_Size;
+
             std::string Filetype;
 
         private:
@@ -72,11 +75,7 @@ namespace HTTP{
                 return Size;    
             }
         
-
-
         public:
-
-            
 
         public:
 
@@ -98,20 +97,21 @@ namespace HTTP{
             return {Code, "Definition not Found"};
         }
 
-        void body(char* _body, size_t _size){
+        void body(char* _body, size_t _size, std::string _filetype = ".html"){
             Body = new char[_size];
             strncpy(Body,_body,_size);
-            Filetype = "text";
+            Filetype = _filetype;
         };
 
         ssize_t body_file(str _path){
 
             if(!file_exists(_path))
                 return -1;
+            
+            Filetype = _path.substr(_path.rfind('.'), _path.size() - _path.rfind('.'));
 
             return read_File(_path.c_str());    
         }
-
 
         Cookie& ad_cookie(str _Name){
             if(Cookies.count(_Name))
@@ -124,9 +124,5 @@ namespace HTTP{
 
     };
 };
-
-
-
-
 
 #endif
