@@ -62,7 +62,6 @@ namespace HTTP{
                 return std::string(expirationdate_str);
             }
 
-
         public:
 
         const std::string expiration;
@@ -100,7 +99,6 @@ namespace HTTP{
                 
                 return Keks;
                 }
-
 
             Cookie(std::string _name, std::string _value): Name(_name),Value(_value),expires_h(Standart_Cookie_Expiration_h){};
 
