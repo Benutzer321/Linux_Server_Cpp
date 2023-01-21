@@ -4,8 +4,12 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <poll.h>
 #include <cstring>
 #include <netdb.h>
+#include <unordered_map>
+
+#define MAX_CLIENTS 255
 
 struct Client
 {
@@ -33,6 +37,29 @@ struct Client
         clientSize(sizeof(client)),
         addrlen(sizeof(addr)){};
 };
+
+class Clients{
+
+private:
+    std::unordered_map<std::string,Client> ClientMap;
+    pollfd FDArr[MAX_CLIENTS];
+    size_t client_n;
+
+private:
+
+public:
+    pollfd* get_fd(){}
+
+
+public:
+
+
+};
+
+
+
+
+
 
 
 #endif

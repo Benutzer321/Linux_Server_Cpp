@@ -15,7 +15,7 @@
 #include <mutex>
 #include <condition_variable>
 
-const static size_t MAX_CLIENTS = 255;
+#define MAX_CLIENTS 255
 
 
 class Handler{

@@ -117,6 +117,20 @@ namespace ez_soc{
         return rvalue;
     };
 
+    int get_ipv4(int fd,sockaddr_in* addr, socklen_t* clientSize){
+
+        int rvalue = getpeername(fd,(sockaddr*)addr,clientSize);
+
+        if(rvalue < 0){
+            if (errno == ENOTCONN)
+                return -1;
+
+            std::cerr << "Fehler bei ermitlung des Peernamens errno:" << errno << std::endl;
+            return -2;}
+
+        return rvalue;
+    };
+
 };
 
 
